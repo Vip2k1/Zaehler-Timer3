@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zähler Timer</title>
+<link rel="manifest" href="manifest.json">
+
+<style>
+  :root {
+    --primary: #1e88e5;
+    --danger: #e53935;
+    --bg: #f2f4f8;
+  }
+  body {margin:0;height:100vh;font-family:system-ui,sans-serif;background:var(--bg);display:flex;justify-content:center;align-items:center;}
+  .card {background:#fff;width:90%;max-width:360px;border-radius:24px;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.15);text-align:center;}
+  .ring-container {position:relative;width:220px;height:220px;margin:0 auto;}
+  svg {transform:rotate(-90deg);}  
+  .ring-bg {stroke:#eee;stroke-width:12;fill:none;}
+  .ring-progress {stroke:var(--primary);stroke-width:12;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear, stroke .3s;}
+  .timer-text {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3rem;font-weight:bold;}
+  .counter {font-size:2.5rem;margin:20px 0 30px;}
+  .fab {width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;font-size:3rem;border:none;box-shadow:0 10px 20px rgba(0,0,0,.3);}  
+  .fab:disabled {background:#aaa;}
+  .reset {margin-top:20px;background:none;border:none;color:#666;font-size:1rem;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="ring-container">
+    <svg width="220" height="220">
+      <circle cx="110" cy="110" r="90" class="ring-bg"/>
+      <circle cx="110" cy="110" r="90" class="ring-progress" id="ring"/>
+    </svg>
+    <div id="timer" class="timer-text">60</div>
+  </div>
+  <div>Zähler</div>
+  <div id="counter" class="counter">0</div>
+  <button id="plusBtn" class="fab">+</button><br>
+  <button id="resetBtn" class="reset">Reset</button>
+</div>
+<script>
+const TOTAL_TIME=60,RADIUS=90,CIRC=2*Math.PI*RADIUS;
+let counter=0,timeLeft=TOTAL_TIME,running=false,interval;
+const timerEl=document.getElementById('timer'),counterEl=document.getElementById('counter'),plusBtn=document.getElementById('plusBtn'),resetBtn=document.getElementById('resetBtn'),ring=document.getElementById('ring');
+ring.style.strokeDasharray=CIRC;ring.style.strokeDashoffset=0;
+function updateRing(){ring.style.strokeDashoffset=CIRC*(1-timeLeft/TOTAL_TIME);if(timeLeft<=10)ring.style.stroke='var(--danger)';}
+function startTimer(){if(running)return;running=true;interval=setInterval(()=>{timeLeft--;timerEl.textContent=timeLeft;updateRing();if(timeLeft<=0){clearInterval(interval);plusBtn.disabled=true;}},1000);}  
+plusBtn.onclick=()=>{if(timeLeft<=0)return;startTimer();counter++;counterEl.textContent=counter;};
+resetBtn.onclick=()=>{clearInterval(interval);counter=0;timeLeft=TOTAL_TIME;running=false;counterEl.textContent=0;timerEl.textContent=TOTAL_TIME;ring.style.strokeDashoffset=0;ring.style.stroke='var(--primary)';plusBtn.disabled=false;};
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js');}
+</script>
+</body>
+</html>
